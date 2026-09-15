@@ -27,7 +27,7 @@ export default {
     environmentIntensity: 0.95,
   },
   postfx: { bloomStrength: 0.30, bloomRadius: 0.6, bloomThreshold: 0.88 },
-  hands: { skinColor: 0xb07a5e, sleeveColor: 0x3b4a42 },
+  hands: { skinColor: 0xb07a5e, sleeveColor: 0x3b4a42, curlLimit: 0.90 },
 
   create({ scene, handRig, audio }) {
     const terrain = createTerrain(scene, {

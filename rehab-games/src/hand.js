@@ -13,6 +13,12 @@ const FINGERS = [
   { x:  0.030, z: -0.002, splay: 0.17, len: 0.074, base: 0.0112, tip: 0.0082, joints: [0, 0.034, 0.056], curl: [0.90, 0.85, 0.75] },
 ];
 
+// Flexion at full curl, per joint, in radians. Roughly MCP 83 deg, PIP 100,
+// DIP 69 — a real closed fist is about 250 degrees summed, not the ~170 a
+// single uniform angle gives you. Each finger scales these by its own factors.
+const FLEX = [1.45, 1.75, 1.20];
+const THUMB_FLEX = [0.95, 0.85];
+
 const THUMB = { x: 0.033, y: 0.021, z: 0.006, len: 0.070, base: 0.0155, tip: 0.0105, joints: [0, 0.034], curl: [0.78, 0.72] };
 
 // A rounded, tapered lathe — the shape of a finger segment chain.
@@ -181,14 +187,14 @@ function buildHand({ handedness, skinMaterial, sleeveMaterial }) {
         const k = chain.curl[bi] ?? 1;
         if (chain.thumb) {
           // The thumb rolls across the palm rather than curling straight in.
-          bone.rotation.x = base.x - a * k * 0.66;
-          bone.rotation.z = base.z + (bi === 0 ? n * a * 0.34 : 0);
+          bone.rotation.x = base.x - a * k * (THUMB_FLEX[bi] ?? 0.85);
+          bone.rotation.z = base.z + (bi === 0 ? n * a * 0.42 : 0);
         } else {
           // NEGATIVE X folds the digit toward the palmar side (-Z in build
           // space), which is where the grasp point sits. Positive X is
           // hyperextension: the fingers fold away and the object ends up
-          // outside the fist. Roughly 62/57/49 degrees across MCP/PIP/DIP.
-          bone.rotation.x = base.x - a * k * 1.08;
+          // outside the fist.
+          bone.rotation.x = base.x - a * k * (FLEX[bi] ?? 1.2);
         }
       });
     });
@@ -209,6 +215,7 @@ export const HAND_DEFAULTS = {
   height: -0.145,
   depth: -0.52,
   pitch: 0.48,
+  curlLimit: 1.0,
 };
 
 export function createHands(parent, opts = {}) {
@@ -250,7 +257,11 @@ export function createHands(parent, opts = {}) {
   return {
     hands,
     materials: { skin, sleeve },
-    setCurl(side, v) { curl[side] = v; hands[side].setCurl(v); },
+    setCurl(side, v) {
+      const limited = v * o.curlLimit;
+      curl[side] = limited;
+      hands[side].setCurl(limited);
+    },
     getCurl(side) { return curl[side]; },
     graspPoint(side, target = new THREE.Vector3()) {
       hands[side].grasp.getWorldPosition(target);

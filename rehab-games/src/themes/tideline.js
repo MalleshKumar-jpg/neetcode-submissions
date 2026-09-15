@@ -31,7 +31,7 @@ export default {
     environmentIntensity: 0.6,
   },
   postfx: { bloomStrength: 0.26, bloomRadius: 0.7, bloomThreshold: 0.92 },
-  hands: { skinColor: 0xb47f64, sleeveColor: 0x474439 },
+  hands: { skinColor: 0xb47f64, sleeveColor: 0x474439, curlLimit: 0.86 },
 
   create({ scene, handRig, audio }) {
     // --- Beach: flat near the knees, sloping away to the waterline ---
