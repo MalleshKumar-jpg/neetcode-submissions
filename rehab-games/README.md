@@ -70,27 +70,88 @@ it. Do this once per machine and monitor; do not assume the offset transfers.
 Toggle it off in the intro screen for a patient-facing session, but leave it on
 whenever you are recording data you intend to analyse.
 
-## Design constraints these scenes respect
+## Confirmed setup
 
-These are not stylistic choices — each one protects the recording.
+Everything below follows from these four facts. If any of them changes, the
+constraints change with it.
 
-- **Low eccentricity.** Both hands sit near the midline (`spread: 0.082`, about
-  10 degrees off centre at the default distance) and a fixation point is drawn
-  dead centre. Objects far into the periphery provoke saccades, and lateralised
-  EOG is precisely what a left/right classifier will learn instead of motor
-  imagery. Raise `spread` only if you have a reason to.
-- **No colour coding of side.** The cue text is one colour for both sides.
-  Different hues mean different luminance, which becomes a lateralised visual
-  evoked potential in the cue epoch.
-- **Symmetric lighting.** Ember Drift's fire sits dead ahead rather than off to
-  one side; a lateral light source would put a standing luminance difference
-  between the two hands.
-- **The object comes to the hand.** It is created at cue onset, lands in the
-  open palm exactly as flex begins, and rides the closing fist. Since the
-  movement is open-loop, the grasp can never miss — no near-misses, no fumbles,
-  nothing that would undercut the patient's sense of having caused it.
-- **Everything is compiled before trial one** (`renderer.compile`), so no shader
-  hitch lands on a phase boundary and skews a marker.
+| | |
+|---|---|
+| Paradigm | Cue-locked motor imagery, open-loop — the hand moves on the timeline whether or not the patient imagined anything |
+| Recording | EEG |
+| Purpose | Collecting time-locked epochs to train a left/right motor-imagery classifier |
+| Actuator | Robotic orthosis / exoskeleton driving the real hand alongside the virtual one |
+
+## Hard constraints
+
+These are not style choices. Each one protects either the recording or the
+patient, and breaking one invalidates data or causes harm.
+
+**Paradigm**
+
+1. Open-loop. No input is read; nothing is scored; nothing can fail.
+2. Timeline is rest 2.0 / cue 0.5 / flex 1.5 / hold 2.5 / extend 1.5 / rest 4.0.
+3. Rest and ITI carry jitter. A fixed period lets the patient entrain and puts
+   anticipatory potentials in the baseline.
+4. Sides are drawn in balanced blocks so left/right counts stay matched even if
+   a session is stopped early.
+5. One action: the clench. The open is a return to rest, not a second task.
+
+**Protecting the epoch (cue through hold)**
+
+6. Both hands sit near the midline and a fixation point is drawn dead centre.
+   Peripheral objects provoke saccades, and lateralised EOG is exactly what a
+   left/right classifier will learn instead of motor imagery.
+7. The side cue is one colour for both sides. Different hues mean different
+   luminance, which becomes a lateralised visual evoked potential.
+8. Lighting is symmetric about the midline. A lateral light source puts a
+   standing luminance difference between the two hands.
+9. The scene is visually still from cue onset through the end of hold. Objects
+   arrive during the *rest* phase and are settled before the cue fires.
+10. Every trial's object looks identical during the epoch. A rare or distinct
+    stimulus on a minority of trials is an oddball and elicits a P300 inside the
+    imagery window. Rarity may only be revealed after extend.
+11. No new sound during the epoch. An auditory onset is an evoked response.
+    Rhythmic audio can entrain oscillations whose harmonics reach mu (8-13 Hz)
+    and beta (13-30 Hz) — the bands the classifier reads.
+
+**Patient safety and accessibility**
+
+12. No strobe or rapid flashing. Post-stroke seizure risk is elevated.
+13. Nothing dark. Darkness raises anxiety, and reduced contrast sensitivity is
+    common post-stroke. Scenes target a mean luminance around 100-140 with
+    under 2% near-black pixels.
+14. No failure states, no time pressure, no scores.
+
+**Timing integrity**
+
+15. Shaders are compiled before trial one. A hitch on a phase boundary skews a
+    marker.
+16. Markers are stamped inside the animation-frame callback that draws the
+    change. The photodiode patch measures what happens after that.
+17. Anything added to the inter-trial window must fit inside the *minimum* ITI
+    (3.0 s), or it starts dictating trial length and the jitter is lost.
+
+## The free window
+
+The 4-second inter-trial rest is the only part of the trial where nothing can
+contaminate the recording — the imagery is over and the next cue has not fired.
+Anything intended to keep the patient engaged across 300 repetitions belongs
+there and nowhere else.
+
+## Two things the orthosis specifically changes
+
+**Mechanical latency.** An orthosis has a command-to-motion delay — typically
+100-300 ms including gearbox backlash. The virtual hand starts instantly, so
+without correction the patient sees the virtual hand move before feeling their
+own, and the congruence you are paying for is broken. Measure your device's
+latency, then either issue the device command early by that amount or delay the
+virtual flex to match.
+
+**Ramp shape.** `EpochScheduler.update` shapes the flex with a smoothstep. A
+motor-driven orthosis usually moves at closer to constant angular velocity, so
+a more linear ramp may match better. Measure the device and change the easing
+to match it — endpoint and trajectory both matter for congruence.
 
 ## Matching the virtual hand to the real one
 
