@@ -10,6 +10,7 @@ const GAMES = [
   { entry: 'pottershand', file: 'potters-hand.html',  title: "Potter's Hand" },
   { entry: 'seedpods',   file: 'seed-pods.html',      title: 'Seed Pods' },
   { entry: 'bellows',    file: 'bellows.html',        title: 'Bellows' },
+  { entry: 'balloontether', file: 'balloon-tether.html', title: 'Balloon Tether' },
   ...(process.env.DEBUG_HAND ? [{ entry: 'debug-hand', file: 'debug-hand.html', title: 'Hand debug' }] : []),
 ];
 
