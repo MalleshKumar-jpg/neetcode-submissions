@@ -72,8 +72,11 @@ button.ghost{background:transparent;border-color:var(--panel-border);color:#9fb8
 #cue{position:absolute;left:50%;top:calc(50% - 86px);transform:translateX(-50%) translateY(-8px);
   opacity:0;transition:opacity .28s ease,transform .28s ease}
 #cue.visible{opacity:1;transform:translateX(-50%) translateY(0)}
-#cue-text{font-size:1.04rem;letter-spacing:.34em;color:#f2f8fb;
-  text-shadow:0 1px 3px rgba(0,0,0,.95),0 2px 16px rgba(0,0,0,.85),0 0 30px rgba(0,0,0,.7)}
+#cue-text{display:inline-block;font-size:1.04rem;letter-spacing:.34em;color:#f4f9fc;
+  padding:7px 20px 7px 26px;border-radius:999px;
+  background:rgba(8,16,22,.52);backdrop-filter:blur(3px);
+  box-shadow:0 2px 18px rgba(0,0,0,.35);
+  text-shadow:0 1px 3px rgba(0,0,0,.9)}
 
 #phasebar{position:absolute;left:0;right:0;bottom:0;height:2px;background:rgba(255,255,255,.06)}
 #phasebar-fill{height:100%;width:100%;transform-origin:left;transform:scaleX(0);

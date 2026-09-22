@@ -51,11 +51,17 @@ export class TrialProp {
     }
   }
 
-  /** At flex onset: hand it over so the object rides the closing fingers. */
-  grasp() {
+  /**
+   * At flex onset: hand it over so the object rides the closing fingers.
+   * `align` snaps the object's local frame to the grasp frame, which is what
+   * any squeeze deformation is expressed in — without it the compression axis
+   * is whatever orientation the object happened to land in.
+   */
+  grasp(align = false) {
     if (!this.obj) return;
     this.obj.position.copy(this.landing);
     this.handRig.attach(this.side, this.obj);
+    if (align) this.obj.rotation.set(0, 0, 0);
   }
 
   /** At extend onset: give it back to the world before it leaves. */
